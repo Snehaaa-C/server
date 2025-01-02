@@ -18,7 +18,8 @@ arduino-cli core install arduino:megaavr
 
 # Installing github library
 arduino-cli lib install "Adafruit NeoPixel"
-arduino-cli lib install "LiquidCrystal I2C"
+arduino-cli lib install "LiquidCrystal I2C"arduino-cli lib list
+
 arduino-cli lib install "Adafruit Motor Shield library"
 arduino-cli lib install Servo
 arduino-cli lib install IRremote

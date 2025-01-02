@@ -6,6 +6,7 @@ const cmd = Promise.promisifyAll(require('node-cmd'));
 const rimraf = Promise.promisify(require('rimraf'));
 const fs = Promise.promisifyAll(require('fs'));
 const path = require("path");
+//const { ESPLoader } = require("esptool-js");
 
 const app = express();
 app.use(bodyParser.text());
@@ -44,6 +45,9 @@ const getBoard = (board) => {
   if (board === "flora") {
     return "adafruit:avr:flora8";
   }
+  if (board === "nodewifi") {
+    return "esp32:esp32:BharatPi-Node-Wifi";
+  }
 
   return null;
 };
@@ -76,26 +80,42 @@ app.post('/upload-code/:board', async (req, res) => {
         __dirname,
         "bin",
         "arduino-cli"
-      )} compile --fqbn ${boardName} ${path.join(
+      )} compile --fqbn ${boardName} --output-dir ${path.join(
         arduinoMakeFolder,
         fileAndFolderName
-      )}`
+    
+      )} ${path.join(arduinoMakeFolder, fileAndFolderName)}`
     );
-    console.log(boardName.replace(':', '.'))
+    console.log('Arduino folder path: ' + arduinoMakeFolder)
+    console.log('File folder path: ' + fileAndFolderName)
+    console.log("path:" + path)
+    //console.log(boardName.replace(':', '.'))
     console.timeEnd("compiling");
+
+    if (board === "nodewifi") {
+      res.sendFile(
+        path.join(
+          arduinoMakeFolder,
+          fileAndFolderName,
+          `${fileAndFolderName}.ino.bin`
+        )
+      );
+    } else {
     res.sendFile(
       path.join(
         arduinoMakeFolder,
         fileAndFolderName,
-        "build",
-        boardName.replace(':', '.').replace(':', '.'),
-        `${fileAndFolderName}.ino.with_bootloader.hex`
+        // "build",
+        // boardName.replace(':', '.').replace(':', '.'),
+        // `${fileAndFolderName}.ino.with_bootloader.hex`
+        `${fileAndFolderName}.ino.hex`
       )
     );
+  }
 
-    await rimraf(path.join(
-        arduinoMakeFolder,
-        fileAndFolderName));
+    // await rimraf(path.join(
+    //     arduinoMakeFolder,
+    //     fileAndFolderName));
   } catch (err) {
     res.send(JSON.stringify({ error: err }));
     console.error('ERROR COMPILING: ' + err);
